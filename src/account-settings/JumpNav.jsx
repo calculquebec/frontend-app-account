@@ -56,14 +56,14 @@ const JumpNav = ({
 //            {intl.formatMessage(messages['account.settings.section.linked.accounts'])}
 //          </NavHashLink>
 //        </li>
-//        {getConfig().ENABLE_ACCOUNT_DELETION
-//          && (
-//          <li>
-//            <NavHashLink to="#delete-account">
-//              {intl.formatMessage(messages['account.settings.jump.nav.delete.account'])}
-//            </NavHashLink>
-//          </li>
-//          )}
+        {false && getConfig().ENABLE_ACCOUNT_DELETION
+          && (
+          <li>
+            <NavHashLink to="#delete-account">
+              {intl.formatMessage(messages['account.settings.jump.nav.delete.account'])}
+            </NavHashLink>
+          </li>
+          )}
       </Scrollspy>
       {showPreferences && (
         <>
