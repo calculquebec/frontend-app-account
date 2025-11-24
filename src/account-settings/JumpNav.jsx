@@ -63,7 +63,7 @@ const JumpNav = ({
 //              {intl.formatMessage(messages['account.settings.jump.nav.delete.account'])}
 //            </NavHashLink>
 //          </li>
-          )}
+//          )}
       </Scrollspy>
       {showPreferences && (
         <>
