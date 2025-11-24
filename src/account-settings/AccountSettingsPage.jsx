@@ -599,7 +599,7 @@ class AccountSettingsPage extends React.Component {
               messages['account.settings.field.email.help.text'],
               { siteName: getConfig().SITE_NAME },
             )}
-            isEditable=false //{this.isEditable('email')}
+            isEditable={this.isEditable('email')}
             {...editableFieldProps}
           />
           {this.renderSecondaryEmailField(editableFieldProps)}
@@ -945,7 +945,7 @@ AccountSettingsPage.defaultProps = {
   timeZoneOptions: [],
   countryTimeZoneOptions: [],
   profileDataManager: null,
-  staticFields: [],
+  staticFields: ['email', 'name'],
   tpaProviders: [],
   isActive: true,
   secondary_email_enabled: false,
