@@ -6,7 +6,7 @@ const siteLanguageList = [
   },
   {
     code: 'fr-ca',
-    name: 'French (CA)',
+    name: 'Français (CA)',
     released: true,
   },
 ];
