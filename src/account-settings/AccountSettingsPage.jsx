@@ -63,11 +63,11 @@ class AccountSettingsPage extends React.Component {
 
     this.navLinkRefs = {
       '#basic-information': React.createRef(),
-      '#profile-information': React.createRef(),
-      '#social-media': React.createRef(),
+//      '#profile-information': React.createRef(),
+//      '#social-media': React.createRef(),
       '#site-preferences': React.createRef(),
-      '#linked-accounts': React.createRef(),
-      '#delete-account': React.createRef(),
+//      '#linked-accounts': React.createRef(),
+//      '#delete-account': React.createRef(),
     };
   }
 
@@ -599,12 +599,12 @@ class AccountSettingsPage extends React.Component {
               messages['account.settings.field.email.help.text'],
               { siteName: getConfig().SITE_NAME },
             )}
-            isEditable={this.isEditable('email')}
+            isEditable=false //{this.isEditable('email')}
             {...editableFieldProps}
           />
           {this.renderSecondaryEmailField(editableFieldProps)}
-          <ResetPassword email={this.props.formValues.email} />
-          {(!getConfig().ENABLE_COPPA_COMPLIANCE)
+//          <ResetPassword email={this.props.formValues.email} />
+/*          {(!getConfig().ENABLE_COPPA_COMPLIANCE)
             && (
             <EditableSelectField
               name="year_of_birth"
@@ -646,10 +646,10 @@ class AccountSettingsPage extends React.Component {
               isEditable={this.isEditable('state')}
               {...editableFieldProps}
             />
-            )}
+            )}*/
         </div>
 
-        <div className="account-section pt-3 mb-5" id="profile-information" ref={this.navLinkRefs['#profile-information']}>
+/*        <div className="account-section pt-3 mb-5" id="profile-information" ref={this.navLinkRefs['#profile-information']}>
           <h2 className="section-heading h4 mb-3">
             {this.props.intl.formatMessage(messages['account.settings.section.profile.information'])}
           </h2>
@@ -695,8 +695,8 @@ class AccountSettingsPage extends React.Component {
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.language.proficiencies.empty'])}
             {...editableFieldProps}
           />
-        </div>
-        <div className="account-section pt-3 mb-5" id="social-media">
+        </div>*/
+/*        <div className="account-section pt-3 mb-5" id="social-media">
           <h2 className="section-heading h4 mb-3">
             {this.props.intl.formatMessage(messages['account.settings.section.social.media'])}
           </h2>
@@ -731,7 +731,7 @@ class AccountSettingsPage extends React.Component {
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter.empty'])}
             {...editableFieldProps}
           />
-        </div>
+        </div>*/
 
         <div className="account-section pt-3 mb-5" id="site-preferences" ref={this.navLinkRefs['#site-preferences']}>
           <h2 className="section-heading h4 mb-3">
@@ -764,7 +764,7 @@ class AccountSettingsPage extends React.Component {
           />
         </div>
 
-        <div className="account-section pt-3 mb-5" id="linked-accounts" ref={this.navLinkRefs['#linked-accounts']}>
+/*        <div className="account-section pt-3 mb-5" id="linked-accounts" ref={this.navLinkRefs['#linked-accounts']}>
           <h2 className="section-heading h4 mb-3">{this.props.intl.formatMessage(messages['account.settings.section.linked.accounts'])}</h2>
           <p>
             {this.props.intl.formatMessage(
@@ -773,9 +773,9 @@ class AccountSettingsPage extends React.Component {
             )}
           </p>
           <ThirdPartyAuth />
-        </div>
+        </div>*/
 
-        {getConfig().ENABLE_ACCOUNT_DELETION
+/*        {getConfig().ENABLE_ACCOUNT_DELETION
           && (
           <div className="account-section pt-3 mb-5" id="delete-account" ref={this.navLinkRefs['#delete-account']}>
             <DeleteAccount
@@ -783,7 +783,7 @@ class AccountSettingsPage extends React.Component {
               hasLinkedTPA={hasLinkedTPA}
             />
           </div>
-          )}
+          )}*/
 
       </>
     );
