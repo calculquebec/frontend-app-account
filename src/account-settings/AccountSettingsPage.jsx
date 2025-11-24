@@ -14,7 +14,7 @@ import {
   getLanguageList,
 } from '@edx/frontend-platform/i18n';
 import {
-  Hyperlink, Icon, Alert,
+  Container, Hyperlink, Icon, Alert,
 } from '@openedx/paragon';
 import { CheckCircle, Error, WarningFilled } from '@openedx/paragon/icons';
 
@@ -47,10 +47,13 @@ import {
   COPPA_COMPLIANCE_YEAR,
   WORK_EXPERIENCE_OPTIONS,
   getStatesList,
+  FIELD_LABELS,
 } from './data/constants';
 import { fetchSiteLanguages } from './site-language';
-import { fetchCourseList } from '../notification-preferences/data/thunks';
+import { fetchNotificationPreferences } from '../notification-preferences/data/thunks';
+import NotificationSettings from '../notification-preferences/NotificationSettings';
 import { withLocation, withNavigate } from './hoc';
+import AdditionalProfileFieldsSlot from '../plugin-slots/AdditionalProfileFieldsSlot';
 
 class AccountSettingsPage extends React.Component {
   constructor(props, context) {
@@ -72,7 +75,7 @@ class AccountSettingsPage extends React.Component {
   }
 
   componentDidMount() {
-    this.props.fetchCourseList();
+    this.props.fetchNotificationPreferences();
     this.props.fetchSettings();
     this.props.fetchSiteLanguages(this.props.navigate);
     sendTrackingLogEvent('edx.user.settings.viewed', {
@@ -120,7 +123,15 @@ class AccountSettingsPage extends React.Component {
     countryOptions: [{
       value: '',
       label: this.props.intl.formatMessage(messages['account.settings.field.country.options.empty']),
-    }].concat(getCountryList(locale).map(({ code, name }) => ({ value: code, label: name }))),
+    }].concat(
+      this.removeDisabledCountries(
+        getCountryList(locale).map(({ code, name }) => ({
+          value: code,
+          label: name,
+          disabled: this.isDisabledCountry(code),
+        })),
+      ),
+    ),
     stateOptions: [{
       value: '',
       label: this.props.intl.formatMessage(messages['account.settings.field.state.options.empty']),
@@ -147,11 +158,30 @@ class AccountSettingsPage extends React.Component {
     })),
   }));
 
+  canDeleteAccount = () => {
+    const { committedValues } = this.props;
+    return !getConfig().COUNTRIES_WITH_DELETE_ACCOUNT_DISABLED.includes(committedValues.country);
+  };
+
+  removeDisabledCountries = (countryList) => {
+    const { countriesCodesList, committedValues } = this.props;
+    const committedCountry = committedValues?.country;
+
+    if (!countriesCodesList.length) {
+      return countryList;
+    }
+    return countryList.filter(({ value }) => value === committedCountry || countriesCodesList.find(x => x === value));
+  };
+
   handleEditableFieldChange = (name, value) => {
     this.props.updateDraft(name, value);
   };
 
   handleSubmit = (formId, values) => {
+    if (formId === FIELD_LABELS.COUNTRY && this.isDisabledCountry(values)) {
+      return;
+    }
+
     const { formValues } = this.props;
     let extendedProfileObject = {};
 
@@ -191,6 +221,12 @@ class AccountSettingsPage extends React.Component {
     } else {
       this.props.saveSettings(formId, values);
     }
+  };
+
+  isDisabledCountry = (country) => {
+    const { countriesCodesList } = this.props;
+
+    return countriesCodesList.length > 0 && !countriesCodesList.find(x => x === country);
   };
 
   isEditable(fieldName) {
@@ -466,7 +502,8 @@ class AccountSettingsPage extends React.Component {
     } = this.getLocalizedOptions(this.context.locale, this.props.formValues.country);
 
     // Show State field only if the country is US (could include Canada later)
-    const showState = this.props.formValues.country === COUNTRY_WITH_STATES;
+    const { country } = this.props.formValues;
+    const showState = country === COUNTRY_WITH_STATES && !this.isDisabledCountry(country);
     const { verifiedName } = this.props;
 
     const hasWorkExperience = !!this.props.formValues?.extended_profile?.find(field => field.field_name === 'work_experience');
@@ -781,6 +818,7 @@ class AccountSettingsPage extends React.Component {
             <DeleteAccount
               isVerifiedAccount={this.props.isActive}
               hasLinkedTPA={hasLinkedTPA}
+              canDeleteAccount={this.canDeleteAccount()}
             />
           </div>
           )}*/}
@@ -813,24 +851,24 @@ class AccountSettingsPage extends React.Component {
     } = this.props;
 
     return (
-      <div className="page__account-settings container-fluid py-5">
+      <Container className="page__account-settings py-5" size="xl">
         {this.renderDuplicateTpaProviderMessage()}
         <h1 className="mb-4">
           {this.props.intl.formatMessage(messages['account.settings.page.heading'])}
         </h1>
         <div>
           <div className="row">
-            <div className="col-md-2">
+            <div className="col-md-3">
               <JumpNav />
             </div>
-            <div className="col-md-10">
+            <div className="col-md-9">
               {loading ? this.renderLoading() : null}
               {loaded ? this.renderContent() : null}
               {loadingError ? this.renderError() : null}
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     );
   }
 }
@@ -849,12 +887,15 @@ AccountSettingsPage.propTypes = {
     name: PropTypes.string,
     email: PropTypes.string,
     secondary_email: PropTypes.string,
-    secondary_email_enabled: PropTypes.bool,
+    secondary_email_enabled: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
     year_of_birth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     country: PropTypes.string,
     level_of_education: PropTypes.string,
     gender: PropTypes.string,
-    extended_profile: PropTypes.string,
+    extended_profile: PropTypes.arrayOf(PropTypes.shape({
+      field_name: PropTypes.string,
+      field_value: PropTypes.string,
+    })),
     language_proficiencies: PropTypes.string,
     pending_name_change: PropTypes.string,
     phone_number: PropTypes.string,
@@ -870,6 +911,7 @@ AccountSettingsPage.propTypes = {
     name: PropTypes.string,
     useVerifiedNameForCerts: PropTypes.bool,
     verified_name: PropTypes.string,
+    country: PropTypes.string,
   }),
   drafts: PropTypes.shape({}),
   formErrors: PropTypes.shape({
@@ -902,13 +944,16 @@ AccountSettingsPage.propTypes = {
   saveSettings: PropTypes.func.isRequired,
   fetchSettings: PropTypes.func.isRequired,
   beginNameChange: PropTypes.func.isRequired,
-  fetchCourseList: PropTypes.func.isRequired,
+  fetchNotificationPreferences: PropTypes.func.isRequired,
   tpaProviders: PropTypes.arrayOf(PropTypes.shape({
     connected: PropTypes.bool,
   })),
-  nameChangeModal: PropTypes.shape({
-    formId: PropTypes.string,
-  }),
+  nameChangeModal: PropTypes.oneOfType([
+    PropTypes.shape({
+      formId: PropTypes.string,
+    }),
+    PropTypes.bool,
+  ]),
   verifiedName: PropTypes.shape({
     verified_name: PropTypes.string,
     status: PropTypes.string,
@@ -928,6 +973,12 @@ AccountSettingsPage.propTypes = {
   ),
   navigate: PropTypes.func.isRequired,
   location: PropTypes.string.isRequired,
+  countriesCodesList: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    }),
+  ),
 };
 
 AccountSettingsPage.defaultProps = {
@@ -937,6 +988,7 @@ AccountSettingsPage.defaultProps = {
   committedValues: {
     useVerifiedNameForCerts: false,
     verified_name: null,
+    country: '',
   },
   drafts: {},
   formErrors: {},
@@ -949,14 +1001,15 @@ AccountSettingsPage.defaultProps = {
   tpaProviders: [],
   isActive: true,
   secondary_email_enabled: false,
-  nameChangeModal: {},
+  nameChangeModal: {} || false,
   verifiedName: null,
   mostRecentVerifiedName: {},
   verifiedNameHistory: [],
+  countriesCodesList: [],
 };
 
 export default withLocation(withNavigate(connect(accountSettingsPageSelector, {
-  fetchCourseList,
+  fetchNotificationPreferences,
   fetchSettings,
   saveSettings,
   saveMultipleSettings,

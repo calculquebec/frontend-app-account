@@ -13,32 +13,62 @@ import ToggleSwitch from './ToggleSwitch';
 import EmailCadences from './EmailCadences';
 import { LOADING_STATUS } from '../constants';
 import { updatePreferenceToggle } from './data/thunks';
-import { selectAppPreferences, selectSelectedCourseId, selectUpdatePreferencesStatus } from './data/selectors';
+import {
+  selectAppNonEditableChannels, selectAppPreferences,
+  selectUpdatePreferencesStatus,
+} from './data/selectors';
 import { notificationChannels, shouldHideAppPreferences } from './data/utils';
+import {
+  EMAIL, EMAIL_CADENCE, EMAIL_CADENCE_PREFERENCES, MIXED,
+} from './data/constants';
 
 const NotificationPreferenceColumn = ({ appId, channel, appPreference }) => {
   const dispatch = useDispatch();
   const intl = useIntl();
-  const courseId = useSelector(selectSelectedCourseId());
   const appPreferences = useSelector(selectAppPreferences(appId));
   const updatePreferencesStatus = useSelector(selectUpdatePreferencesStatus());
+  const nonEditable = useSelector(selectAppNonEditableChannels(appId));
   const mobileView = useIsOnMobile();
   const NOTIFICATION_CHANNELS = Object.values(notificationChannels());
   const hideAppPreferences = shouldHideAppPreferences(appPreferences, appId) || false;
 
+  const getValue = useCallback((notificationChannel, innerText, checked) => {
+    if (notificationChannel === EMAIL_CADENCE) {
+      return innerText;
+    }
+    return checked;
+  }, []);
+
+  const getEmailCadence = useCallback((notificationChannel, checked, innerText, emailCadence) => {
+    if (notificationChannel === EMAIL_CADENCE) {
+      return innerText;
+    }
+    if (notificationChannel === EMAIL && checked) {
+      return EMAIL_CADENCE_PREFERENCES.DAILY;
+    }
+    return emailCadence;
+  }, []);
+
   const onToggle = useCallback((event, notificationType) => {
-    const { name: notificationChannel } = event.target;
-    const value = notificationChannel === 'email_cadence' ? event.target.innerText : event.target.checked;
+    const { name: notificationChannel, checked, innerText } = event.target;
+    const appNotificationPreference = appPreferences.find(preference => preference.id === notificationType);
+
+    const value = getValue(notificationChannel, innerText, checked);
+    const emailCadence = getEmailCadence(
+      notificationChannel,
+      checked,
+      innerText,
+      appNotificationPreference.emailCadence,
+    );
 
     dispatch(updatePreferenceToggle(
-      courseId,
       appId,
       notificationType,
       notificationChannel,
       value,
+      emailCadence !== MIXED ? emailCadence : undefined,
     ));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appId]);
+  }, [appPreferences, getValue, getEmailCadence, dispatch, appId]);
 
   const renderPreference = (preference) => (
     (preference?.coreNotificationTypes?.length > 0 || preference.id !== 'core') && (
@@ -56,16 +86,17 @@ const NotificationPreferenceColumn = ({ appId, channel, appPreference }) => {
         name={channel}
         value={preference[channel]}
         onChange={(event) => onToggle(event, preference.id)}
-        disabled={updatePreferencesStatus === LOADING_STATUS}
-        id={`${preference.id}-${channel}`}
+        disabled={updatePreferencesStatus === LOADING_STATUS || nonEditable[preference.id]?.includes(channel)}
+        id={`toggle-${preference.id}-${channel}`}
         className="my-1"
       />
-      {channel === 'email' && (
+      {channel === EMAIL && (
       <EmailCadences
         email={preference.email}
         onToggle={onToggle}
         emailCadence={preference.emailCadence}
         notificationType={preference.id}
+        disabled={nonEditable[preference.id]?.includes(channel)}
       />
       )}
     </div>

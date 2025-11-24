@@ -10,7 +10,6 @@ import {
 
 describe('notification-preferences reducer', () => {
   let state = null;
-  const selectedCourseId = 'selected-course-id';
 
   const preferenceData = {
     apps: [{ id: 'discussion', enabled: true }],
@@ -28,52 +27,6 @@ describe('notification-preferences reducer', () => {
     state = reducer();
   });
 
-  it('updates course list when api call is successful', () => {
-    const data = {
-      pagination: {
-        count: 1,
-        currentPage: 1,
-        hasMore: false,
-        totalPages: 1,
-      },
-      courseList: [
-        { id: selectedCourseId, name: 'Selected Course' },
-      ],
-    };
-    const result = reducer(
-      state,
-      { type: Actions.FETCHED_COURSE_LIST, payload: data },
-    );
-    expect(result.courses).toEqual({
-      status: SUCCESS_STATUS,
-      courses: data.courseList,
-      pagination: data.pagination,
-    });
-  });
-
-  test.each([
-    { action: Actions.FETCHING_COURSE_LIST, status: LOADING_STATUS },
-    { action: Actions.FAILED_COURSE_LIST, status: FAILURE_STATUS },
-  ])('course list is empty when api call is %s', ({ action, status }) => {
-    const result = reducer(
-      state,
-      { type: action },
-    );
-    expect(result.courses).toEqual({
-      status,
-      courses: [],
-      pagination: {},
-    });
-  });
-
-  it('updates selected course id', () => {
-    const result = reducer(
-      state,
-      { type: Actions.UPDATE_SELECTED_COURSE, courseId: selectedCourseId },
-    );
-    expect(result.preferences.selectedCourse).toEqual(selectedCourseId);
-  });
-
   it('updates preferences when api call is successful', () => {
     const result = reducer(
       state,
@@ -82,7 +35,6 @@ describe('notification-preferences reducer', () => {
     expect(result.preferences).toEqual({
       status: SUCCESS_STATUS,
       updatePreferenceStatus: SUCCESS_STATUS,
-      selectedCourse: null,
       ...preferenceData,
     });
   });
@@ -97,7 +49,6 @@ describe('notification-preferences reducer', () => {
     );
     expect(result.preferences).toEqual({
       status,
-      selectedCourse: null,
       preferences: [],
       apps: [],
       nonEditable: {},

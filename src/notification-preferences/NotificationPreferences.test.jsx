@@ -3,13 +3,18 @@ import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import { BrowserRouter as Router } from 'react-router-dom';
 
+import { setConfig } from '@edx/frontend-platform';
 import * as auth from '@edx/frontend-platform/auth';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { defaultState } from './data/reducers';
 import NotificationPreferences from './NotificationPreferences';
-import { FAILURE_STATUS, LOADING_STATUS, SUCCESS_STATUS } from '../constants';
+import { LOADING_STATUS, SUCCESS_STATUS } from '../constants';
+import {
+  getNotificationPreferences,
+  postPreferenceToggle,
+} from './data/service';
 
 const courseId = 'selected-course-id';
 
@@ -51,7 +56,7 @@ const defaultPreferences = {
       appId: 'coursework',
       web: false,
       push: false,
-      email: false,
+      email: true,
       coreNotificationTypes: [],
     },
     {
@@ -66,7 +71,7 @@ const defaultPreferences = {
   nonEditable: {
     discussion: {
       core: [
-        'web',
+        'web', 'email',
       ],
     },
   },
@@ -77,6 +82,7 @@ const setupStore = (override = {}) => {
   storeState.courses = {
     status: SUCCESS_STATUS,
     courses: [
+      { id: '', name: 'Account' },
       { id: 'selected-course-id', name: 'Selected Course' },
     ],
   };
@@ -104,10 +110,13 @@ describe('Notification Preferences', () => {
   let store;
 
   beforeEach(() => {
+    setConfig({
+      SHOW_EMAIL_CHANNEL: '',
+    });
+
     store = setupStore({
       ...defaultPreferences,
       status: SUCCESS_STATUS,
-      selectedCourse: courseId,
     });
 
     auth.getAuthenticatedHttpClient = jest.fn(() => ({
@@ -138,17 +147,73 @@ describe('Notification Preferences', () => {
     expect(screen.queryAllByTestId('notification-preference')).toHaveLength(4);
   });
 
-  it('update preference on click', async () => {
-    const wrapper = await render(notificationPreferences(store));
-    const element = wrapper.container.querySelector('#core-web');
-    expect(element).not.toBeChecked();
+  it('update account preference on click', async () => {
+    store = setupStore({
+      ...defaultPreferences,
+      status: SUCCESS_STATUS,
+    });
+    await render(notificationPreferences(store));
+    const element = screen.getByTestId('toggle-core-web');
     await fireEvent.click(element);
     expect(mockDispatch).toHaveBeenCalled();
   });
 
-  it('show not found page if invalid course id is entered in url', async () => {
-    store = setupStore({ status: FAILURE_STATUS, selectedCourse: 'invalid-course-id' });
+  it('test non editable', async () => {
+    setConfig({
+      SHOW_EMAIL_CHANNEL: 'true',
+    });
+    store = setupStore({
+      ...defaultPreferences,
+      status: SUCCESS_STATUS,
+      selectedCourse: '',
+    });
     await render(notificationPreferences(store));
-    expect(screen.queryByTestId('not-found-page')).toBeInTheDocument();
+    expect(screen.getByTestId('toggle-core-web')).toBeDisabled();
+    expect(screen.getByTestId('toggle-core-email')).toBeDisabled();
+    expect(screen.getAllByTestId('email-cadence-button')[0]).toBeDisabled();
+    expect(screen.getByTestId('toggle-newGrade-web')).not.toBeDisabled();
+  });
+});
+
+describe('Notification Preferences API v2 Logic', () => {
+  const LMS_BASE_URL = 'https://lms.example.com';
+  let mockHttpClient;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockHttpClient = {
+      get: jest.fn().mockResolvedValue({ data: {} }),
+      put: jest.fn().mockResolvedValue({ data: {} }),
+      post: jest.fn().mockResolvedValue({ data: {} }),
+      patch: jest.fn().mockResolvedValue({ data: {} }),
+    };
+    auth.getAuthenticatedHttpClient.mockReturnValue(mockHttpClient);
+
+    setConfig({ LMS_BASE_URL });
+  });
+
+  describe('getNotificationPreferences', () => {
+    it('should call the v2 configurations URL', async () => {
+      const expectedUrl = `${LMS_BASE_URL}/api/notifications/v2/configurations/`;
+
+      await getNotificationPreferences();
+
+      expect(mockHttpClient.get).toHaveBeenCalledWith(expectedUrl);
+      expect(mockHttpClient.get).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('postPreferenceToggle', () => {
+    it('should call the v2 configurations URL with PUT method', async () => {
+      const expectedUrl = `${LMS_BASE_URL}/api/notifications/v2/configurations/`;
+      const testArgs = ['app_name', 'notification_type', 'web', true, 'daily'];
+
+      await postPreferenceToggle(...testArgs);
+
+      expect(mockHttpClient.put).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+      expect(mockHttpClient.put).toHaveBeenCalledTimes(1);
+      expect(mockHttpClient.post).not.toHaveBeenCalled();
+    });
   });
 });

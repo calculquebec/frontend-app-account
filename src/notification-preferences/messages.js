@@ -27,8 +27,9 @@ const messages = defineMessages({
       newQuestionPost {New question posts}
       contentReported {Reported content}
       courseUpdates {Course updates}
-      oraStaffNotification {ORA new submissions}
+      oraStaffNotifications {New ORA submission for staff grading}
       oraGradeAssigned {Essay assignment grade received}
+      newInstructorAllLearnersPost {New posts from instructors}
       other {{text}}
     }`,
     description: 'Display text for Notification Types',
@@ -89,6 +90,31 @@ const messages = defineMessages({
     id: 'notification.preference.guide.body',
     defaultMessage: 'Notifications for certain activities are enabled by default,',
     description: 'Body of the notification preferences for learner guide',
+  },
+  notificationCadenceDescription: {
+    id: 'notification.cadence.description',
+    defaultMessage: 'Daily email notifications are sent at {dailyTime}. Weekly email notifications are sent every Sunday at {weeklyTime}.',
+    description: 'Notification cadence description',
+  },
+  notificationDefaultInfo: {
+    id: 'notification.default.info',
+    defaultMessage: 'Notifications for certain activities are enabled by default, as detailed here',
+    description: 'Default notification info',
+  },
+  notificationDropdownlabel: {
+    id: 'notification.dropdown.label',
+    defaultMessage: 'Select notifications for',
+    description: 'Dropdown label',
+  },
+  notificationDropdownApplies: {
+    id: 'notification.dropdown.applies',
+    defaultMessage: 'Applies to all courses',
+    description: 'Dropdown applies to all courses',
+  },
+  notificationCourseDropdownApplies: {
+    id: 'notification.dropdown.course.applies',
+    defaultMessage: 'Overrides account-wide settings',
+    description: 'Dropdown applies to specific course',
   },
 });
 

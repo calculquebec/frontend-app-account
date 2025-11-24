@@ -10,12 +10,12 @@ import {
 } from '@openedx/paragon';
 
 import messages from './messages';
-import EMAIL_CADENCE from './data/constants';
+import { EMAIL_CADENCE_PREFERENCES, EMAIL_CADENCE } from './data/constants';
 import { selectUpdatePreferencesStatus } from './data/selectors';
 import { LOADING_STATUS } from '../constants';
 
 const EmailCadences = ({
-  email, onToggle, emailCadence, notificationType,
+  email, onToggle, emailCadence, notificationType, disabled = false,
 }) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
@@ -26,9 +26,10 @@ const EmailCadences = ({
     <>
       <Button
         ref={setTarget}
+        data-testid="email-cadence-button"
         variant="outline-primary"
         onClick={open}
-        disabled={!email || updatePreferencesStatus === LOADING_STATUS}
+        disabled={!email || updatePreferencesStatus === LOADING_STATUS || disabled}
         size="sm"
         iconAfter={isOpen ? ExpandLess : ExpandMore}
         className="border-light-300 justify-content-between ml-3.5 cadence-button"
@@ -44,16 +45,17 @@ const EmailCadences = ({
           className="bg-white shadow d-flex flex-column margin-left-2"
           data-testid="email-cadence-dropdown"
         >
-          {Object.values(EMAIL_CADENCE).map((cadence) => (
+          {Object.values(EMAIL_CADENCE_PREFERENCES).map((cadence) => (
             <Dropdown.Item
               key={cadence}
               as={Button}
               variant="tertiary"
-              name="email_cadence"
+              name={EMAIL_CADENCE}
               className="d-flex justify-content-start py-1.5 font-size-14 cadence-button"
               size="inline"
               active={cadence === emailCadence}
               autoFocus={cadence === emailCadence}
+              data-testid={`email-cadence-${cadence}`}
               onClick={(event) => {
                 onToggle(event, notificationType);
                 close();
@@ -71,8 +73,9 @@ const EmailCadences = ({
 EmailCadences.propTypes = {
   email: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
-  emailCadence: PropTypes.oneOf(Object.values(EMAIL_CADENCE)).isRequired,
+  emailCadence: PropTypes.oneOf(Object.values(EMAIL_CADENCE_PREFERENCES)).isRequired,
   notificationType: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default React.memo(EmailCadences);

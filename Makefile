@@ -1,5 +1,3 @@
-
-
 intl_imports = ./node_modules/.bin/intl-imports.js
 transifex_utils = ./node_modules/.bin/transifex-utils.js
 i18n = ./src/i18n
@@ -19,6 +17,11 @@ test.npm.%: validate-no-uncommitted-package-lock-changes
 	npm run $(*)
 
 .PHONY: requirements
+
+precommit:
+	npm run lint
+	npm audit
+
 requirements:  ## install ci requirements
 	npm ci
 

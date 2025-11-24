@@ -1,7 +1,6 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectIntl, intlShape } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Button, Form, StatefulButton,
 } from '@openedx/paragon';
@@ -19,6 +18,7 @@ import { editableFieldSelector } from './data/selectors';
 import CertificatePreference from './certificate-preference/CertificatePreference';
 
 const EditableSelectField = (props) => {
+  const intl = useIntl();
   const {
     name,
     label,
@@ -39,7 +39,6 @@ const EditableSelectField = (props) => {
     isEditing,
     isEditable,
     isGrayedOut,
-    intl,
     ...others
   } = props;
   const id = `field-${name}`;
@@ -107,6 +106,7 @@ const EditableSelectField = (props) => {
             <option
               value={subOption.value}
               key={`${subOption.value}-${subOption.label}`}
+              disabled={subOption?.disabled}
             >
               {subOption.label}
             </option>
@@ -115,7 +115,7 @@ const EditableSelectField = (props) => {
       );
     }
     return (
-      <option value={option.value} key={`${option.value}-${option.label}`}>
+      <option value={option.value} key={`${option.value}-${option.label}`} disabled={option?.disabled}>
         {option.label}
       </option>
     );
@@ -226,7 +226,6 @@ EditableSelectField.propTypes = {
   isEditing: PropTypes.bool,
   isEditable: PropTypes.bool,
   isGrayedOut: PropTypes.bool,
-  intl: intlShape.isRequired,
 };
 
 EditableSelectField.defaultProps = {
@@ -248,4 +247,4 @@ EditableSelectField.defaultProps = {
 export default connect(editableFieldSelector, {
   onEdit: openForm,
   onCancel: closeForm,
-})(injectIntl(EditableSelectField));
+})(EditableSelectField);

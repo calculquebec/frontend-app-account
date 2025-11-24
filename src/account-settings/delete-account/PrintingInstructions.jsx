@@ -1,19 +1,19 @@
-import React from 'react';
-import { FormattedMessage, injectIntl, intlShape } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Hyperlink } from '@openedx/paragon';
 
 import { getConfig } from '@edx/frontend-platform';
 import messages from './messages';
 
-const PrintingInstructions = (props) => {
+const PrintingInstructions = () => {
+  const intl = useIntl();
   const actionLink = (
     <Hyperlink
       // TODO: What would a generic version of this link look like?  Should
       // CERTIFICATE_SHARING_HELP_URL really be a configuration variable?  In the meantime,
       // We've removed the link from the default message.
-      destination="https://support.edx.org/hc/en-us/sections/115004173027-Receive-and-Share-edX-Certificates"
+      destination="https://help.edx.org/edxlearner/s/topic/0TOQq0000001UVVOA2/certificates"
     >
-      {props.intl.formatMessage(messages['account.settings.delete.account.text.3.link'])}
+      {intl.formatMessage(messages['account.settings.delete.account.text.3.link'])}
     </Hyperlink>
   );
 
@@ -40,8 +40,4 @@ const PrintingInstructions = (props) => {
   );
 };
 
-PrintingInstructions.propTypes = {
-  intl: intlShape.isRequired,
-};
-
-export default injectIntl(PrintingInstructions);
+export default PrintingInstructions;

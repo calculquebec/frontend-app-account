@@ -132,6 +132,6 @@ export function getStatesList(country) {
   return country && COUNTRY_STATES_MAP[country.toUpperCase()];
 }
 
-export const DECLINED = 'declined';
-export const SELF_DESCRIBE = 'self-describe';
-export const OTHER = 'other';
+export const FIELD_LABELS = {
+  COUNTRY: 'country',
+};

@@ -1,9 +1,8 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectIntl, intlShape, FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useIntl, FormattedMessage } from '@edx/frontend-platform/i18n';
 import {
-  Button, StatefulButton, Form,
+  Button, StatefulButton, Form, Tooltip, OverlayTrigger,
 } from '@openedx/paragon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
@@ -35,9 +34,9 @@ const EmailField = (props) => {
     onChange,
     isEditing,
     isEditable,
-    intl,
   } = props;
   const id = `field-${name}`;
+  const intl = useIntl();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -162,7 +161,16 @@ const EmailField = (props) => {
                 </Button>
               ) : null}
             </div>
-            <p data-hj-suppress>{renderValue()}</p>
+            <OverlayTrigger
+              placement="top"
+              overlay={(
+                <Tooltip id={`tooltip-${name}`} variant="light" className="d-sm-none">
+                  {renderValue()}
+                </Tooltip>
+              )}
+            >
+              <p data-hj-suppress className="text-truncate">{renderValue()}</p>
+            </OverlayTrigger>
             {renderConfirmationMessage() || <p className="small text-muted mt-n2">{helpText}</p>}
           </div>
         ),
@@ -191,7 +199,6 @@ EmailField.propTypes = {
   onChange: PropTypes.func.isRequired,
   isEditing: PropTypes.bool,
   isEditable: PropTypes.bool,
-  intl: intlShape.isRequired,
 };
 
 EmailField.defaultProps = {
@@ -210,4 +217,4 @@ EmailField.defaultProps = {
 export default connect(editableFieldSelector, {
   onEdit: openForm,
   onCancel: closeForm,
-})(injectIntl(EmailField));
+})(EmailField);

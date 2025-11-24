@@ -2,33 +2,27 @@ import { getConfig, snakeCaseObject } from '@edx/frontend-platform';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import snakeCase from 'lodash.snakecase';
 
-export const getCourseNotificationPreferences = async (courseId) => {
-  const url = `${getConfig().LMS_BASE_URL}/api/notifications/configurations/${courseId}`;
+export const getNotificationPreferences = async () => {
+  const url = `${getConfig().LMS_BASE_URL}/api/notifications/v2/configurations/`;
   const { data } = await getAuthenticatedHttpClient().get(url);
   return data;
 };
 
-export const getCourseList = async (page, pageSize) => {
-  const params = snakeCaseObject({ page, pageSize });
-  const url = `${getConfig().LMS_BASE_URL}/api/notifications/enrollments/`;
-  const { data } = await getAuthenticatedHttpClient().get(url, { params });
-  return data;
-};
-
-export const patchPreferenceToggle = async (
-  courseId,
+export const postPreferenceToggle = async (
   notificationApp,
   notificationType,
   notificationChannel,
   value,
+  emailCadence,
 ) => {
   const patchData = snakeCaseObject({
     notificationApp,
     notificationType: snakeCase(notificationType),
     notificationChannel,
     value,
+    emailCadence,
   });
-  const url = `${getConfig().LMS_BASE_URL}/api/notifications/configurations/${courseId}`;
-  const { data } = await getAuthenticatedHttpClient().patch(url, patchData);
+  const url = `${getConfig().LMS_BASE_URL}/api/notifications/v2/configurations/`;
+  const { data } = await getAuthenticatedHttpClient().put(url, patchData);
   return data;
 };
