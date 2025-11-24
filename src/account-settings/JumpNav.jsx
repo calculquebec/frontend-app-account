@@ -22,11 +22,11 @@ const JumpNav = ({
       <Scrollspy
         items={[
           'basic-information',
-          'profile-information',
-          'social-media',
+/*          'profile-information',*/
+/*          'social-media',*/
           'site-preferences',
-          'linked-accounts',
-          'delete-account',
+/*          'linked-accounts',*/
+/*          'delete-account',*/
         ]}
         className="list-unstyled"
         currentClassName="font-weight-bold"
@@ -36,6 +36,7 @@ const JumpNav = ({
             {intl.formatMessage(messages['account.settings.section.account.information'])}
           </NavHashLink>
         </li>
+{/*
         <li>
           <NavHashLink to="#profile-information">
             {intl.formatMessage(messages['account.settings.section.profile.information'])}
@@ -45,13 +46,13 @@ const JumpNav = ({
           <NavHashLink to="#social-media">
             {intl.formatMessage(messages['account.settings.section.social.media'])}
           </NavHashLink>
-        </li>
+        </li>*/}
         <li>
           <NavHashLink to="#site-preferences">
             {intl.formatMessage(messages['account.settings.section.site.preferences'])}
           </NavHashLink>
         </li>
-        <li>
+{/*        <li>
           <NavHashLink to="#linked-accounts">
             {intl.formatMessage(messages['account.settings.section.linked.accounts'])}
           </NavHashLink>
@@ -63,7 +64,7 @@ const JumpNav = ({
               {intl.formatMessage(messages['account.settings.jump.nav.delete.account'])}
             </NavHashLink>
           </li>
-          )}
+          )}*/}
       </Scrollspy>
       {showPreferences && (
         <>
