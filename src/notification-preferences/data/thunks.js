@@ -1,5 +1,6 @@
 import { camelCaseObject } from '@edx/frontend-platform';
-import EMAIL_CADENCE from './constants';
+import camelCase from 'lodash.camelcase';
+import { EMAIL, EMAIL_CADENCE, EMAIL_CADENCE_PREFERENCES } from './constants';
 import {
   fetchCourseListSuccess,
   fetchCourseListFetching,
@@ -14,6 +15,7 @@ import {
   getCourseList,
   getCourseNotificationPreferences,
   patchPreferenceToggle,
+  postPreferenceToggle,
 } from './service';
 
 const normalizeCourses = (responseData) => {
@@ -36,8 +38,29 @@ const normalizeCourses = (responseData) => {
   };
 };
 
-const normalizePreferences = (responseData) => {
-  const preferences = responseData.notificationPreferenceConfig;
+export const normalizeAccountPreferences = (originalData, updateInfo) => {
+  const {
+    app, notificationType, channel, updatedValue,
+  } = updateInfo.data;
+
+  const preferenceToUpdate = originalData.preferences.find(
+    (preference) => preference.appId === app && preference.id === camelCase(notificationType),
+  );
+
+  if (preferenceToUpdate) {
+    preferenceToUpdate[camelCase(channel)] = updatedValue;
+  }
+
+  return originalData;
+};
+
+const normalizePreferences = (responseData, courseId) => {
+  let preferences;
+  if (courseId) {
+    preferences = responseData.notificationPreferenceConfig;
+  } else {
+    preferences = responseData.data;
+  }
 
   const appKeys = Object.keys(preferences);
   const apps = appKeys.map((appId) => ({
@@ -56,7 +79,8 @@ const normalizePreferences = (responseData) => {
         push: preferences[appId].notificationTypes[preferenceId].push,
         email: preferences[appId].notificationTypes[preferenceId].email,
         info: preferences[appId].notificationTypes[preferenceId].info || '',
-        emailCadence: preferences[appId].notificationTypes[preferenceId].emailCadence || EMAIL_CADENCE.DAILY,
+        emailCadence: preferences[appId].notificationTypes[preferenceId].emailCadence
+        || EMAIL_CADENCE_PREFERENCES.DAILY,
         coreNotificationTypes: preferences[appId].coreNotificationTypes || [],
       }
     ));
@@ -92,11 +116,17 @@ export const fetchCourseNotificationPreferences = (courseId) => (
       dispatch(updateSelectedCourse(courseId));
       dispatch(fetchNotificationPreferenceFetching());
       const data = await getCourseNotificationPreferences(courseId);
-      const normalizedData = normalizePreferences(camelCaseObject(data));
+      const normalizedData = normalizePreferences(camelCaseObject(data), courseId);
       dispatch(fetchNotificationPreferenceSuccess(courseId, normalizedData));
     } catch (errors) {
       dispatch(fetchNotificationPreferenceFailed());
     }
+  }
+);
+
+export const setSelectedCourse = courseId => (
+  async (dispatch) => {
+    dispatch(updateSelectedCourse(courseId));
   }
 );
 
@@ -106,24 +136,63 @@ export const updatePreferenceToggle = (
   notificationType,
   notificationChannel,
   value,
+  emailCadence,
 ) => (
   async (dispatch) => {
     try {
+      // Initially update the UI to give immediate feedback
       dispatch(updatePreferenceValue(
         notificationApp,
         notificationType,
         notificationChannel,
         !value,
       ));
-      const data = await patchPreferenceToggle(
-        courseId,
-        notificationApp,
-        notificationType,
-        notificationChannel,
-        value,
-      );
-      const normalizedData = normalizePreferences(camelCaseObject(data));
-      dispatch(fetchNotificationPreferenceSuccess(courseId, normalizedData));
+
+      // Function to handle data normalization and dispatching success
+      const handleSuccessResponse = (data, isGlobal = false) => {
+        const processedData = courseId
+          ? normalizePreferences(camelCaseObject(data), courseId)
+          : camelCaseObject(data);
+
+        dispatch(fetchNotificationPreferenceSuccess(courseId, processedData, isGlobal));
+        return processedData;
+      };
+
+      // Function to toggle preference based on context (course-specific or global)
+      const togglePreference = async (channel, toggleValue, cadence) => {
+        if (courseId) {
+          return patchPreferenceToggle(
+            courseId,
+            notificationApp,
+            notificationType,
+            channel,
+            channel === EMAIL_CADENCE ? cadence : toggleValue,
+          );
+        }
+
+        return postPreferenceToggle(
+          notificationApp,
+          notificationType,
+          channel,
+          channel === EMAIL_CADENCE ? undefined : toggleValue,
+          cadence,
+        );
+      };
+
+      // Execute the main preference toggle
+      const data = await togglePreference(notificationChannel, value, emailCadence);
+      handleSuccessResponse(data, !courseId);
+
+      // Handle special case for email notifications
+      if (notificationChannel === EMAIL && value) {
+        const emailCadenceData = await togglePreference(
+          EMAIL_CADENCE,
+          courseId ? undefined : value,
+          EMAIL_CADENCE_PREFERENCES.DAILY,
+        );
+
+        handleSuccessResponse(emailCadenceData, !courseId);
+      }
     } catch (errors) {
       dispatch(updatePreferenceValue(
         notificationApp,
