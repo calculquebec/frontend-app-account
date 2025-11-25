@@ -19,7 +19,7 @@ const JumpNav = ({
           'basic-information',
 /*          'profile-information',*/
 /*          'social-media',*/
-          'notifications',
+/*          'notifications',*/
           'site-preferences',
 /*          'linked-accounts',*/
 /*          'delete-account',*/
@@ -44,11 +44,11 @@ const JumpNav = ({
             {intl.formatMessage(messages['account.settings.section.social.media'])}
           </NavHashLink>
         </li>*/}
-        <li>
+{/*        <li>
           <NavHashLink to="#notifications">
             {intl.formatMessage(messages['notification.preferences.notifications.label'])}
           </NavHashLink>
-        </li>
+        </li>*/}
         <li>
           <NavHashLink to="#site-preferences">
             {intl.formatMessage(messages['account.settings.section.site.preferences'])}
