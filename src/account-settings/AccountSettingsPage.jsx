@@ -66,12 +66,12 @@ class AccountSettingsPage extends React.Component {
 
     this.navLinkRefs = {
       '#basic-information': React.createRef(),
-      '#profile-information': React.createRef(),
-      '#social-media': React.createRef(),
-      '#notifications': React.createRef(),
+/*      '#profile-information': React.createRef(),*/
+/*      '#social-media': React.createRef(),*/
+/*      '#notifications': React.createRef(),*/
       '#site-preferences': React.createRef(),
-      '#linked-accounts': React.createRef(),
-      '#delete-account': React.createRef(),
+/*      '#linked-accounts': React.createRef(),*/
+/*      '#delete-account': React.createRef(),*/
     };
   }
 
@@ -231,7 +231,7 @@ class AccountSettingsPage extends React.Component {
   };
 
   isEditable(fieldName) {
-    return !this.props.staticFields.includes(fieldName);
+    return false;
   }
 
   isManagedProfile() {
@@ -641,8 +641,8 @@ class AccountSettingsPage extends React.Component {
             {...editableFieldProps}
           />
           {this.renderSecondaryEmailField(editableFieldProps)}
-          <ResetPassword email={this.props.formValues.email} />
-          {(!getConfig().ENABLE_COPPA_COMPLIANCE)
+{/*          <ResetPassword email={this.props.formValues.email} />*/}
+{/*          {(!getConfig().ENABLE_COPPA_COMPLIANCE)
             && (
             <EditableSelectField
               name="year_of_birth"
@@ -684,10 +684,10 @@ class AccountSettingsPage extends React.Component {
               isEditable={this.isEditable('state')}
               {...editableFieldProps}
             />
-            )}
+            )}*/}
         </div>
 
-        <div className="account-section pt-3 mb-5" id="profile-information" ref={this.navLinkRefs['#profile-information']}>
+{/*        <div className="account-section pt-3 mb-5" id="profile-information" ref={this.navLinkRefs['#profile-information']}>
           <h2 className="section-heading h4 mb-3">
             {this.props.intl.formatMessage(messages['account.settings.section.profile.information'])}
           </h2>
@@ -735,8 +735,8 @@ class AccountSettingsPage extends React.Component {
           />
 
           <AdditionalProfileFieldsSlot />
-        </div>
-        <div className="account-section pt-3 mb-6" id="social-media">
+        </div>*/}
+{/*        <div className="account-section pt-3 mb-6" id="social-media">
           <h2 className="section-heading h4 mb-3">
             {this.props.intl.formatMessage(messages['account.settings.section.social.media'])}
           </h2>
@@ -771,7 +771,7 @@ class AccountSettingsPage extends React.Component {
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter.empty'])}
             {...editableFieldProps}
           />
-        </div>
+        </div>*/}
         <div className="border border-light-700" />
         <div className="mt-6" id="notifications" ref={this.navLinkRefs['#notifications']}>
           <NotificationSettings />
@@ -807,7 +807,7 @@ class AccountSettingsPage extends React.Component {
           />
         </div>
 
-        <div className="account-section pt-3 mb-5" id="linked-accounts" ref={this.navLinkRefs['#linked-accounts']}>
+{/*        <div className="account-section pt-3 mb-5" id="linked-accounts" ref={this.navLinkRefs['#linked-accounts']}>
           <h2 className="section-heading h4 mb-3">{this.props.intl.formatMessage(messages['account.settings.section.linked.accounts'])}</h2>
           <p>
             {this.props.intl.formatMessage(
@@ -816,9 +816,9 @@ class AccountSettingsPage extends React.Component {
             )}
           </p>
           <ThirdPartyAuth />
-        </div>
+        </div>*/}
 
-        {getConfig().ENABLE_ACCOUNT_DELETION && (
+{/*        {getConfig().ENABLE_ACCOUNT_DELETION && (
           <div className="account-section pt-3 mb-5" id="delete-account" ref={this.navLinkRefs['#delete-account']}>
             <DeleteAccount
               isVerifiedAccount={this.props.isActive}
@@ -826,7 +826,7 @@ class AccountSettingsPage extends React.Component {
               canDeleteAccount={this.canDeleteAccount()}
             />
           </div>
-        )}
+        )}*/}
       </>
     );
   }
@@ -1001,7 +1001,7 @@ AccountSettingsPage.defaultProps = {
   timeZoneOptions: [],
   countryTimeZoneOptions: [],
   profileDataManager: null,
-  staticFields: [],
+  staticFields: ['email', 'name'],
   tpaProviders: [],
   isActive: true,
   secondary_email_enabled: false,
