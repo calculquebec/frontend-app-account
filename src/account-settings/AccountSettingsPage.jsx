@@ -67,7 +67,7 @@ class AccountSettingsPage extends React.Component {
     this.navLinkRefs = {
       '#basic-information': React.createRef(),
 /*      '#profile-information': React.createRef(),*/
-/*      '#social-media': React.createRef(),*/
+      '#social-media': React.createRef(),
 /*      '#notifications': React.createRef(),*/
       '#site-preferences': React.createRef(),
 /*      '#linked-accounts': React.createRef(),*/
@@ -736,7 +736,7 @@ class AccountSettingsPage extends React.Component {
 
           <AdditionalProfileFieldsSlot />
         </div>*/}
-{/*        <div className="account-section pt-3 mb-6" id="social-media">
+        <div className="account-section pt-3 mb-6" id="social-media">
           <h2 className="section-heading h4 mb-3">
             {this.props.intl.formatMessage(messages['account.settings.section.social.media'])}
           </h2>
@@ -755,7 +755,7 @@ class AccountSettingsPage extends React.Component {
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.linkedin.empty'])}
             {...editableFieldProps}
           />
-          <EditableField
+{/*         <EditableField
             name="social_link_facebook"
             type="text"
             value={this.props.formValues.social_link_facebook}
@@ -770,8 +770,8 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter.empty'])}
             {...editableFieldProps}
-          />
-        </div>*/}
+          />*/}
+        </div>
         <div className="border border-light-700" />
         <div className="mt-6" id="notifications" ref={this.navLinkRefs['#notifications']}>
           <NotificationSettings />
@@ -904,8 +904,8 @@ AccountSettingsPage.propTypes = {
     pending_name_change: PropTypes.string,
     phone_number: PropTypes.string,
     social_link_linkedin: PropTypes.string,
-    social_link_facebook: PropTypes.string,
-    social_link_twitter: PropTypes.string,
+//    social_link_facebook: PropTypes.string,
+//    social_link_twitter: PropTypes.string,
     time_zone: PropTypes.string,
     state: PropTypes.string,
     useVerifiedNameForCerts: PropTypes.bool.isRequired,
