@@ -1,19 +1,14 @@
 import { getConfig } from '@edx/frontend-platform';
 
-export const notificationChannels = () => ({
+import { parseEnvBoolean } from '../../utils';
+
+export const notificationChannels = (showEmailPreferences = true) => ({
   WEB: 'web',
-  ...(getConfig().SHOW_PUSH_CHANNEL && { PUSH: 'push' }),
-  ...(getConfig().SHOW_EMAIL_CHANNEL && { EMAIL: 'email' }),
+  ...(parseEnvBoolean(getConfig().SHOW_PUSH_CHANNEL) && { PUSH: 'push' }),
+  ...(showEmailPreferences && { EMAIL: 'email' }),
 });
 
 export const shouldHideAppPreferences = (preferences, appId) => {
   const appPreferences = preferences.filter(pref => pref.appId === appId);
-
-  if (appPreferences.length !== 1) {
-    return false;
-  }
-
-  const firstPreference = appPreferences[0];
-
-  return firstPreference?.id === 'core' && (!firstPreference.coreNotificationTypes?.length);
+  return appPreferences.length === 0;
 };

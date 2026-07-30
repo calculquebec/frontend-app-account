@@ -22,7 +22,7 @@ const messages = defineMessages({
     id: 'notification.preference.title',
     defaultMessage: `{
       text, select,
-      core {Activity notifications}
+      groupedNotification {Activity notifications}
       newDiscussionPost {New discussion posts}
       newQuestionPost {New question posts}
       contentReported {Reported content}
@@ -30,6 +30,7 @@ const messages = defineMessages({
       oraStaffNotifications {New ORA submission for staff grading}
       oraGradeAssigned {Essay assignment grade received}
       newInstructorAllLearnersPost {New posts from instructors}
+      oraReminder {Essay assignment reminders}
       other {{text}}
     }`,
     description: 'Display text for Notification Types',
@@ -93,7 +94,7 @@ const messages = defineMessages({
   },
   notificationCadenceDescription: {
     id: 'notification.cadence.description',
-    defaultMessage: 'Daily email notifications are sent at {dailyTime}. Weekly email notifications are sent every Sunday at {weeklyTime}.',
+    defaultMessage: 'Daily email notifications are sent at {dailyTime}. Weekly email notifications are sent every Monday at {weeklyTime}.',
     description: 'Notification cadence description',
   },
   notificationDefaultInfo: {

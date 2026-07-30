@@ -77,8 +77,8 @@ const defaultPreferences = {
   },
 };
 
-const setupStore = (override = {}) => {
-  const storeState = defaultState;
+const setupStore = (override = {}, stateOverride = {}) => {
+  const storeState = { ...defaultState, ...stateOverride };
   storeState.courses = {
     status: SUCCESS_STATUS,
     courses: [
@@ -111,7 +111,6 @@ describe('Notification Preferences', () => {
 
   beforeEach(() => {
     mergeConfig({
-      SHOW_EMAIL_CHANNEL: '',
       SHOW_PUSH_CHANNEL: '',
     }, 'App loadConfig override handler');
 
@@ -138,7 +137,7 @@ describe('Notification Preferences', () => {
   });
 
   it('show spinner if api call is in progress', async () => {
-    store = setupStore({ status: LOADING_STATUS });
+    store = setupStore({ ...defaultPreferences, status: LOADING_STATUS });
     await render(notificationPreferences(store));
     expect(screen.queryByTestId('loading-spinner')).toBeInTheDocument();
   });
@@ -160,9 +159,6 @@ describe('Notification Preferences', () => {
   });
 
   it('test non editable', async () => {
-    setConfig({
-      SHOW_EMAIL_CHANNEL: 'true',
-    });
     store = setupStore({
       ...defaultPreferences,
       status: SUCCESS_STATUS,
@@ -202,23 +198,20 @@ describe('Notification Preferences', () => {
     expect(screen.queryByTestId('toggle-core-push')).toBeInTheDocument();
   });
 
-  it('does not render email channel when SHOW_EMAIL_CHANNEL is false', async () => {
-    setConfig({
-      SHOW_EMAIL_CHANNEL: '',
-    });
-    store = setupStore({
-      ...defaultPreferences,
-      status: SUCCESS_STATUS,
-      selectedCourse: '',
-    });
+  it('does not render email channel when show_email_preferences is false', async () => {
+    store = setupStore(
+      {
+        ...defaultPreferences,
+        status: SUCCESS_STATUS,
+        selectedCourse: '',
+      },
+      { showEmailPreferences: false },
+    );
     await render(notificationPreferences(store));
     expect(screen.queryByTestId('toggle-core-email')).not.toBeInTheDocument();
   });
 
-  it('renders email channel when SHOW_EMAIL_CHANNEL is true', async () => {
-    setConfig({
-      SHOW_EMAIL_CHANNEL: 'true',
-    });
+  it('renders email channel when show_email_preferences is true', async () => {
     store = setupStore({
       ...defaultPreferences,
       status: SUCCESS_STATUS,
@@ -249,7 +242,7 @@ describe('Notification Preferences API v2 Logic', () => {
 
   describe('getNotificationPreferences', () => {
     it('should call the v2 configurations URL', async () => {
-      const expectedUrl = `${LMS_BASE_URL}/api/notifications/v2/configurations/`;
+      const expectedUrl = `${LMS_BASE_URL}/api/notifications/v3/configurations/`;
 
       await getNotificationPreferences();
 
@@ -260,7 +253,7 @@ describe('Notification Preferences API v2 Logic', () => {
 
   describe('postPreferenceToggle', () => {
     it('should call the v2 configurations URL with PUT method', async () => {
-      const expectedUrl = `${LMS_BASE_URL}/api/notifications/v2/configurations/`;
+      const expectedUrl = `${LMS_BASE_URL}/api/notifications/v3/configurations/`;
       const testArgs = ['app_name', 'notification_type', 'web', true, 'daily'];
 
       await postPreferenceToggle(...testArgs);

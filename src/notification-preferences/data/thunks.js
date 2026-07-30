@@ -35,7 +35,7 @@ const normalizePreferences = (responseData) => {
   const apps = appKeys.map((appId) => ({
     id: appId,
     enabled: preferences[appId].enabled,
-  }));
+  })).sort((a, b) => a.id.localeCompare(b.id));
 
   const nonEditable = {};
   const preferenceList = appKeys.map(appId => {
@@ -50,7 +50,6 @@ const normalizePreferences = (responseData) => {
         info: preferences[appId].notificationTypes[preferenceId].info || '',
         emailCadence: preferences[appId].notificationTypes[preferenceId].emailCadence
         || EMAIL_CADENCE_PREFERENCES.DAILY,
-        coreNotificationTypes: preferences[appId].coreNotificationTypes || [],
       }
     ));
     nonEditable[appId] = preferences[appId].nonEditable;
@@ -72,7 +71,11 @@ export const fetchNotificationPreferences = () => (
       dispatch(fetchNotificationPreferenceFetching());
       const data = camelCaseObject(await getNotificationPreferences());
       const normalizedData = normalizePreferences(data);
-      dispatch(fetchNotificationPreferenceSuccess(normalizedData, data.showPreferences));
+      dispatch(fetchNotificationPreferenceSuccess(
+        normalizedData,
+        data.showPreferences,
+        data.showEmailPreferences ?? true,
+      ));
     } catch (errors) {
       dispatch(fetchNotificationPreferenceFailed());
     }
@@ -100,7 +103,12 @@ export const updatePreferenceToggle = (
       const handleSuccessResponse = (data) => {
         const processedData = camelCaseObject(data);
 
-        dispatch(fetchNotificationPreferenceSuccess(processedData, processedData.showPreferences, true));
+        dispatch(fetchNotificationPreferenceSuccess(
+          processedData,
+          processedData.showPreferences,
+          processedData.showEmailPreferences ?? true,
+          true,
+        ));
         return processedData;
       };
 
@@ -122,7 +130,7 @@ export const updatePreferenceToggle = (
         const emailCadenceData = await togglePreference(
           EMAIL_CADENCE,
           value,
-          EMAIL_CADENCE_PREFERENCES.DAILY,
+          emailCadence,
         );
 
         handleSuccessResponse(emailCadenceData);
